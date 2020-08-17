@@ -162,12 +162,15 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="pathfinding.cpp" />
     <ClCompile Include="private\App.cpp" />
+    <ClCompile Include="private\Grid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="public\App.hpp" />
+    <ClInclude Include="public\Grid.hpp" />
+    <ClInclude Include="public\Node.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

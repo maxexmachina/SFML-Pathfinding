@@ -19,38 +19,49 @@ void App::update() {
 	handleEvents();
 	ImGui::SFML::Update(mWindow, mDeltaClock.restart());
 
-	ImGui::Begin("Grid editor"); 
+	ImGui::Begin("Grid editor");
 
 	if (ImGui::DragInt("Width", &mTilesHorizontal, 1.f, 10, 60)) {
+		std::cout << mTilesHorizontal << "\n";
 		mWindow.setSize(sf::Vector2u(mTileSize * mTilesHorizontal, mTileSize * mTilesVertical));
 		mWindow.setView(sf::View(sf::FloatRect(0, 0, static_cast<float>(mTileSize * mTilesHorizontal), static_cast<float>(mTileSize * mTilesVertical))));
+		mGrid.handleResize(mTilesHorizontal, mTilesVertical);
 	}
 
 	if (ImGui::DragInt("Height", &mTilesVertical, 1.f, 10, 60)) {
 		mWindow.setSize(sf::Vector2u(mTileSize * mTilesHorizontal, mTileSize * mTilesVertical));
 		mWindow.setView(sf::View(sf::FloatRect(0, 0, static_cast<float>(mTileSize * mTilesHorizontal), static_cast<float>(mTileSize * mTilesVertical))));
+		mGrid.handleResize(mTilesHorizontal, mTilesVertical);
 	}
+
+	if (ImGui::RadioButton("Walkable", mSelectedType == NodeType::Walkable)) { mSelectedType = NodeType::Walkable; } ImGui::SameLine();
+	if (ImGui::RadioButton("Obstacle", mSelectedType == NodeType::Obstacle)) { mSelectedType = NodeType::Obstacle; }
+	if (ImGui::RadioButton("Seeker", mSelectedType == NodeType::Seeker)) { mSelectedType = NodeType::Seeker; } ImGui::SameLine();
+	if (ImGui::RadioButton("Target", mSelectedType == NodeType::Target)) { mSelectedType = NodeType::Target; }
+
 
 	ImGui::End(); 
 
 	mWindow.clear(sf::Color::Black); 
 
-	for (std::size_t i = 0; i < mTilesHorizontal; ++i) {
-		for (std::size_t j = 0; j < mTilesVertical; ++j) {
-			mWalkableSprite.setPosition(
-				static_cast <float> (i * mTileSize),
-				static_cast <float> (j * mTileSize));
-
-			mWindow.draw(mWalkableSprite);
+	for (size_t y = 0; y < mTilesVertical; y++) {
+		for (size_t x = 0; x < mTilesHorizontal; x++) {
+			switch (mGrid.get(x, y).type()) {
+				case NodeType::Walkable:
+					drawTile(mWalkableSprite, x, y);
+					break;
+				case NodeType::Obstacle:
+					drawTile(mObstacleSprite, x, y);
+					break;
+				case NodeType::Seeker:
+					drawTile(mSeekerSprite, x, y);
+					break;
+				case NodeType::Target:
+					drawTile(mTargetSprite, x, y);
+					break;
+			}
 		}
 	}
-
-	sf::Vector2i clickedTile = screenPosToTiles(mLastClickPosition);
-	mObstacleSprite.setPosition(
-		static_cast <float> (clickedTile.x * mTileSize),
-		static_cast <float> (clickedTile.y * mTileSize));
-
-	mWindow.draw(mObstacleSprite);
 
 	ImGui::SFML::Render(mWindow);
 	mWindow.display();
@@ -81,14 +92,22 @@ void App::handleEvents() {
 
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (event.key.code == sf::Mouse::Right) {
-					mMousePosition = sf::Mouse::getPosition(mWindow);
-                    mLastClickPosition = mMousePosition;
+					sf::Vector2i clickedTile = screenPosToTiles(sf::Mouse::getPosition(mWindow));
+					
+					std::cout << mSelectedType << "\n";
+					mGrid.setTypeAt(clickedTile.x, clickedTile.y, mSelectedType);
                 }
             }
-
         }
 }
 
-const sf::Vector2i App::screenPosToTiles(sf::Vector2i screenPos) {
+const sf::Vector2i App::screenPosToTiles(const sf::Vector2i& screenPos) {
     return sf::Vector2i{ screenPos.x / mTileSize, screenPos.y / mTileSize };
+}
+
+void App::drawTile(sf::Sprite& sprite, size_t x, size_t y) {
+	sprite.setPosition(
+		static_cast <float> (x * mTileSize),
+		static_cast <float> (y * mTileSize));
+	mWindow.draw(sprite);
 }

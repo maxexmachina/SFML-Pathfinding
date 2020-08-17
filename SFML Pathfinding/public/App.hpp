@@ -1,10 +1,14 @@
 #pragma once
 
+#include <iostream>
+
 #include "imgui.h"
 #include "imgui-SFML.h"
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+
+#include "Grid.hpp"
 
 class App {
 
@@ -17,7 +21,8 @@ private:
 	void init();
 	void update();
 	void handleEvents();
-	const sf::Vector2i screenPosToTiles(sf::Vector2i screenPos);
+	const sf::Vector2i screenPosToTiles(const sf::Vector2i& screenPos);
+	void drawTile(sf::Sprite& sprite, size_t x, size_t y);
 
 private:
 	int mTilesHorizontal, mTilesVertical;
@@ -35,7 +40,11 @@ private:
 private:
 	sf::Vector2i mMousePosition;
 	sf::Vector2i mLastClickPosition;
+	NodeType mSelectedType;
 
 private:
 	sf::Clock mDeltaClock;
+
+private:
+	Grid mGrid{ mTilesHorizontal, mTilesVertical };
 };
