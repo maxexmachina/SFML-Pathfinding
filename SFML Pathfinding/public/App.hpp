@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iostream>
+#include <map>
+#include <queue>
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -23,6 +25,7 @@ private:
 	void handleEvents();
 	const sf::Vector2i screenPosToTiles(const sf::Vector2i& screenPos);
 	void drawTile(sf::Sprite& sprite, size_t x, size_t y);
+	void resize();
 
 private:
 	int mTilesHorizontal, mTilesVertical;
@@ -47,4 +50,6 @@ private:
 
 private:
 	Grid mGrid{ mTilesHorizontal, mTilesVertical };
+	std::map<NodeType, sf::Sprite> mTileTypes;
+	bool mIfSizeSelected = false;
 };

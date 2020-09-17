@@ -13,32 +13,45 @@ void App::init() {
     mTargetSprite = sf::Sprite(mTargetTexture);
     mSeekerSprite = sf::Sprite(mSeekerTexture);
     mObstacleSprite = sf::Sprite(mObstacleTexture);
+
+	mTileTypes = std::map<NodeType, sf::Sprite>{
+		std::make_pair(NodeType::Obstacle, mObstacleSprite),
+		std::make_pair(NodeType::Walkable, mWalkableSprite),
+		std::make_pair(NodeType::Seeker, mSeekerSprite),
+		std::make_pair(NodeType::Target, mTargetSprite)
+	};
 }
 
 void App::update() {
 	handleEvents();
 	ImGui::SFML::Update(mWindow, mDeltaClock.restart());
 
-	ImGui::Begin("Grid editor");
+	if (!mIfSizeSelected) {
+		ImGui::Begin("Size selector");
+		if (ImGui::DragInt("Width", &mTilesHorizontal, 1.f, 10, 60)) {
+			resize();
+		}
 
-	if (ImGui::DragInt("Width", &mTilesHorizontal, 1.f, 10, 60)) {
-		std::cout << mTilesHorizontal << "\n";
-		mWindow.setSize(sf::Vector2u(mTileSize * mTilesHorizontal, mTileSize * mTilesVertical));
-		mWindow.setView(sf::View(sf::FloatRect(0, 0, static_cast<float>(mTileSize * mTilesHorizontal), static_cast<float>(mTileSize * mTilesVertical))));
-		mGrid.handleResize(mTilesHorizontal, mTilesVertical);
+		if (ImGui::DragInt("Height", &mTilesVertical, 1.f, 10, 60)) {
+			resize();
+		}
+
+		if (ImGui::Button("Confirm size")) {
+			mIfSizeSelected = true;
+		}
+	} else {
+		ImGui::Begin("Grid editor");
+
+		if (ImGui::RadioButton("Walkable", mSelectedType == NodeType::Walkable)) { mSelectedType = NodeType::Walkable; } ImGui::SameLine();
+		if (ImGui::RadioButton("Obstacle", mSelectedType == NodeType::Obstacle)) { mSelectedType = NodeType::Obstacle; }
+		if (ImGui::RadioButton("Seeker", mSelectedType == NodeType::Seeker)) { mSelectedType = NodeType::Seeker; } ImGui::SameLine();
+		if (ImGui::RadioButton("Target", mSelectedType == NodeType::Target)) { mSelectedType = NodeType::Target; }
+
+		if (ImGui::Button("Reset grid")) { 
+			mGrid.handleResize(mGrid.getSize().x, mGrid.getSize().y); 
+			mIfSizeSelected = false;
+		}
 	}
-
-	if (ImGui::DragInt("Height", &mTilesVertical, 1.f, 10, 60)) {
-		mWindow.setSize(sf::Vector2u(mTileSize * mTilesHorizontal, mTileSize * mTilesVertical));
-		mWindow.setView(sf::View(sf::FloatRect(0, 0, static_cast<float>(mTileSize * mTilesHorizontal), static_cast<float>(mTileSize * mTilesVertical))));
-		mGrid.handleResize(mTilesHorizontal, mTilesVertical);
-	}
-
-	if (ImGui::RadioButton("Walkable", mSelectedType == NodeType::Walkable)) { mSelectedType = NodeType::Walkable; } ImGui::SameLine();
-	if (ImGui::RadioButton("Obstacle", mSelectedType == NodeType::Obstacle)) { mSelectedType = NodeType::Obstacle; }
-	if (ImGui::RadioButton("Seeker", mSelectedType == NodeType::Seeker)) { mSelectedType = NodeType::Seeker; } ImGui::SameLine();
-	if (ImGui::RadioButton("Target", mSelectedType == NodeType::Target)) { mSelectedType = NodeType::Target; }
-
 
 	ImGui::End(); 
 
@@ -91,12 +104,17 @@ void App::handleEvents() {
             }
 
             if (event.type == sf::Event::MouseButtonPressed) {
-                if (event.key.code == sf::Mouse::Right) {
+				while (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
 					sf::Vector2i clickedTile = screenPosToTiles(sf::Mouse::getPosition(mWindow));
 					
-					std::cout << mSelectedType << "\n";
-					mGrid.setTypeAt(clickedTile.x, clickedTile.y, mSelectedType);
-                }
+					if (0 <= clickedTile.x && clickedTile.x < mTilesHorizontal && 0 <= clickedTile.y && clickedTile.y < mTilesVertical) {
+						if (mGrid.get(clickedTile.x, clickedTile.y).type() != mSelectedType) {
+							mGrid.setTypeAt(clickedTile.x, clickedTile.y, mSelectedType);
+							drawTile(mTileTypes.at(mSelectedType), clickedTile.x, clickedTile.y);
+						}
+					}
+					mWindow.display();
+				}
             }
         }
 }
@@ -110,4 +128,10 @@ void App::drawTile(sf::Sprite& sprite, size_t x, size_t y) {
 		static_cast <float> (x * mTileSize),
 		static_cast <float> (y * mTileSize));
 	mWindow.draw(sprite);
+}
+
+void App::resize() {
+	mWindow.setSize(sf::Vector2u(mTileSize * mTilesHorizontal, mTileSize * mTilesVertical));
+	mWindow.setView(sf::View(sf::FloatRect(0, 0, static_cast<float>(mTileSize * mTilesHorizontal), static_cast<float>(mTileSize * mTilesVertical))));
+	mGrid.handleResize(mTilesHorizontal, mTilesVertical);
 }
