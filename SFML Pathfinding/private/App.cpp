@@ -47,6 +47,13 @@ void App::update() {
 		if (ImGui::RadioButton("Seeker", mSelectedType == NodeType::Seeker)) { mSelectedType = NodeType::Seeker; } ImGui::SameLine();
 		if (ImGui::RadioButton("Target", mSelectedType == NodeType::Target)) { mSelectedType = NodeType::Target; }
 
+		if (ImGui::Button("Find path")) {
+			mPath = mStar.findPath();
+			for (auto& tile : mPath) {
+				mGrid.setTypeAt(tile.x, tile.y, NodeType::Walkable);
+			}
+		}
+
 		if (ImGui::Button("Reset grid")) { 
 			mGrid.handleResize(mGrid.getSize().x, mGrid.getSize().y); 
 			mIfSizeSelected = false;
@@ -108,8 +115,15 @@ void App::handleEvents() {
 					sf::Vector2i clickedTile = screenPosToTiles(sf::Mouse::getPosition(mWindow));
 					
 					if (0 <= clickedTile.x && clickedTile.x < mTilesHorizontal && 0 <= clickedTile.y && clickedTile.y < mTilesVertical) {
-						if (mGrid.get(clickedTile.x, clickedTile.y).type() != mSelectedType) {
+						Node tile = mGrid.get(clickedTile.x, clickedTile.y);
+						if (tile.type() != mSelectedType) {
 							mGrid.setTypeAt(clickedTile.x, clickedTile.y, mSelectedType);
+							if (mSelectedType == NodeType::Target) {
+								mGrid.setTarget(tile);
+							}
+							if (mSelectedType == NodeType::Seeker) {
+								mGrid.setSeeker(tile);
+							}
 							drawTile(mTileTypes.at(mSelectedType), clickedTile.x, clickedTile.y);
 						}
 					}

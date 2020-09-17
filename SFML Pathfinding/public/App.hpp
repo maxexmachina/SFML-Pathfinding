@@ -11,6 +11,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "Grid.hpp"
+#include "AStar.hpp"
 
 class App {
 
@@ -52,4 +53,8 @@ private:
 	Grid mGrid{ mTilesHorizontal, mTilesVertical };
 	std::map<NodeType, sf::Sprite> mTileTypes;
 	bool mIfSizeSelected = false;
+
+private:
+	AStar mStar{ mGrid };
+	std::vector<sf::Vector2i> mPath;
 };

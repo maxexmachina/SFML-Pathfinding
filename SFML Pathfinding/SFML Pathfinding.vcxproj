@@ -74,13 +74,13 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -162,14 +162,18 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="pathfinding.cpp" />
     <ClCompile Include="private\App.cpp" />
+    <ClCompile Include="private\AStar.cpp" />
     <ClCompile Include="private\Grid.cpp" />
+    <ClCompile Include="private\Heap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="public\App.hpp" />
+    <ClInclude Include="public\AStar.hpp" />
     <ClInclude Include="public\Grid.hpp" />
+    <ClInclude Include="public\Heap.hpp" />
     <ClInclude Include="public\Node.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
